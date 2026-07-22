@@ -53,22 +53,41 @@ echo "=== Install deps ==="
 "$PIP" install --upgrade pip
 "$PIP" install -r requirements.txt
 
-# .env: public_html/.env, public_html/env (файл) или familygraph/.env
+# Безопасная загрузка .env (без source — иначе ломают $, ), # и т.п.)
+load_env_file() {
+  local file="$1"
+  [ -f "$file" ] || return 0
+  echo "=== Load env: $file ==="
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%$'\r'}"
+    case "$line" in
+      ''|\#*) continue ;;
+    esac
+    case "$line" in
+      *=*) ;;
+      *) continue ;;
+    esac
+    local key="${line%%=*}"
+    local value="${line#*=}"
+    key="${key%"${key##*[![:space:]]}"}"
+    key="${key#"${key%%[![:space:]]*}"}"
+    value="${value#"${value%%[![:space:]]*}"}"
+    value="${value%"${value##*[![:space:]]}"}"
+    if [[ "$value" == \"*\" ]]; then
+      value="${value:1:${#value}-2}"
+    elif [[ "$value" == \'*\' ]]; then
+      value="${value:1:${#value}-2}"
+    fi
+    export "${key}=${value}"
+  done < "$file"
+}
+
 if [ -f "$PUBLIC_HTML/.env" ]; then
-  set -a
-  # shellcheck disable=SC1091
-  source "$PUBLIC_HTML/.env"
-  set +a
+  load_env_file "$PUBLIC_HTML/.env"
 elif [ -f "$PUBLIC_HTML/env" ] && [ ! -d "$PUBLIC_HTML/env" ]; then
-  set -a
-  # shellcheck disable=SC1091
-  source "$PUBLIC_HTML/env"
-  set +a
+  load_env_file "$PUBLIC_HTML/env"
 elif [ -f "$APP_DIR/.env" ]; then
-  set -a
-  # shellcheck disable=SC1091
-  source "$APP_DIR/.env"
-  set +a
+  load_env_file "$APP_DIR/.env"
 fi
 
 export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-config.settings}"
