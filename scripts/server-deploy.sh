@@ -53,7 +53,7 @@ echo "=== Install deps ==="
 "$PIP" install --upgrade pip
 "$PIP" install -r requirements.txt
 
-# .env: /home/c/ck78395/.env или public_html/.env
+# .env: /home/c/ck78395/familygraph/.env или public_html/.env
 if [ -f "$APP_DIR/.env" ]; then
   set -a
   # shellcheck disable=SC1091

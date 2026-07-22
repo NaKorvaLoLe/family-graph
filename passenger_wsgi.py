@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parent
-# Beget: код в ~/public_html, venv и .env в ~/
+# Beget: код в ~/familygraph/public_html, venv и .env в ~/familygraph/
 APP_DIR = PROJECT_DIR.parent
 VENV_SITE = APP_DIR / 'env' / 'lib'
 

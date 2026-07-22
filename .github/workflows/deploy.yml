@@ -42,11 +42,11 @@ jobs:
           whoami
           date
 
-          # Beget: /home/c/ck78395/public_html + venv в /home/c/ck78395/env
+          # Beget: /home/c/ck78395/familygraph/public_html
           BASE_DIR="$HOME"
           if [ -d "/home/c/ck78395" ]; then BASE_DIR="/home/c/ck78395"; fi
-          APP_DIR="$BASE_DIR"
-          PUBLIC_HTML="$BASE_DIR/public_html"
+          APP_DIR="$BASE_DIR/familygraph"
+          PUBLIC_HTML="$APP_DIR/public_html"
 
           mkdir -p "$PUBLIC_HTML"
           cd "$PUBLIC_HTML"
