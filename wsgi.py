@@ -10,6 +10,9 @@ APP_DIR = PROJECT_DIR.parent
 VENV_DIR = APP_DIR / 'env'
 ERROR_LOG = PROJECT_DIR / 'wsgi_error.log'
 
+# Timeweb отдаёт HTTPS на прокси — Django должен считать запросы secure
+os.environ['HTTPS'] = 'on'
+
 
 def _log(msg: str) -> None:
     try:
@@ -57,7 +60,14 @@ try:
 
     from django.core.wsgi import get_wsgi_application
 
-    application = get_wsgi_application()
+    _django_app = get_wsgi_application()
+
+    def application(environ, start_response):
+        # На всякий случай фиксируем схему для CSRF/сессий
+        environ['wsgi.url_scheme'] = 'https'
+        environ['HTTPS'] = 'on'
+        return _django_app(environ, start_response)
+
 except Exception:
     _log('=== wsgi.py crash ===')
     _log(traceback.format_exc())

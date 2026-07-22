@@ -21,7 +21,7 @@ DEBUG = _env_bool('DJANGO_DEBUG', True)
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in _env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    for host in _env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,genbu.ru,www.genbu.ru').split(',')
     if host.strip()
 ]
 
@@ -30,6 +30,13 @@ CSRF_TRUSTED_ORIGINS = [
     for origin in _env('CSRF_TRUSTED_ORIGINS', '').split(',')
     if origin.strip()
 ]
+# Автоматически для HTTPS-доменов (иначе логин в админку ломается)
+if not CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS = [
+        f'https://{host}'
+        for host in ALLOWED_HOSTS
+        if host not in {'localhost', '127.0.0.1'}
+    ]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -76,6 +83,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 30,
+        },
     }
 }
 
@@ -109,7 +119,16 @@ STATICFILES_FINDERS = [
 SASS_PROCESSOR_ROOT = BASE_DIR / 'static'
 SASS_PROCESSOR_ENABLED = True
 
+# Timeweb: HTTPS терминируется на прокси — без этого логин уходит в http:// и сессия «теряется»
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_HTTPONLY = True
+
+# Для genbu.ru сайт всегда по HTTPS
+SESSION_COOKIE_SECURE = _env_bool('DJANGO_COOKIE_SECURE', True)
+CSRF_COOKIE_SECURE = _env_bool('DJANGO_COOKIE_SECURE', True)
+
 if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = False  # редирект делает Timeweb, не Django
