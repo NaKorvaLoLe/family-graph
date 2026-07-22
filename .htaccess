@@ -1,8 +1,3 @@
+# Минимальный конфиг для Timeweb/Beget.
+# Лишние Passenger*-директивы часто дают именно "Internal Server Error".
 PassengerEnabled On
-PassengerAppRoot /home/c/ck78395/familygraph/public_html
-PassengerBaseURI /
-PassengerPython /home/c/ck78395/familygraph/env/bin/python
-PassengerStartupFile passenger_wsgi.py
-
-# Если 500 не уходит — в панели Timeweb проверьте путь Python
-# и что корень сайта = familygraph/public_html
