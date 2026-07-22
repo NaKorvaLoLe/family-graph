@@ -82,5 +82,8 @@ echo "=== Collect static ==="
 mkdir -p tmp
 touch tmp/restart.txt
 
+# Timeweb: wsgi.py должен быть исполняемым
+chmod +x wsgi.py 2>/dev/null || true
+
 echo "=== Deploy finished ==="
 "$PYTHON" -c "import django; print('Django', django.get_version())"
