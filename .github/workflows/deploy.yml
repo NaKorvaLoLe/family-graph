@@ -1,0 +1,86 @@
+# Деплой по логину/паролю (не SSH-ключ) — appleboy/ssh-action
+# https://github.com/appleboy/ssh-action
+#
+# Secrets (Settings → Secrets and variables → Actions):
+#   HOST           — хост SSH (например, ck78395.beget.tech)
+#   USERNAME       — логин SSH
+#   SSH_PASSWORD   — пароль SSH
+#   PORT           — обычно 22
+#   TOKEN_GITHUB   — GitHub PAT (repo) для git pull на сервере
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.2.5
+      env:
+        TOKEN_GITHUB: ${{ secrets.TOKEN_GITHUB }}
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: ${{ secrets.PORT || 22 }}
+        protocol: tcp4
+        timeout: 120s
+        command_timeout: 30m
+        debug: true
+        envs: TOKEN_GITHUB
+        script: |
+          set -e
+          echo "=== SSH connected ==="
+          whoami
+          date
+
+          # Путь на Beget: /home/c/<login>/<site>
+          # Поменяйте familygraph на имя папки сайта на хостинге
+          BASE_DIR="$HOME"
+          if [ -d "/home/c/ck78395" ]; then BASE_DIR="/home/c/ck78395"; fi
+          APP_DIR="$BASE_DIR/familygraph"
+          PUBLIC_HTML="$APP_DIR/public_html"
+
+          mkdir -p "$PUBLIC_HTML"
+          cd "$PUBLIC_HTML"
+
+          export GIT_TERMINAL_PROMPT=0
+          export GIT_ASKPASS=echo
+
+          if [ -z "${TOKEN_GITHUB:-}" ]; then
+            echo "ERROR: TOKEN_GITHUB is not set"
+            exit 1
+          fi
+
+          REPO_URL="https://${TOKEN_GITHUB}@github.com/NaKorvaLoLe/family-graph.git"
+          BRANCH="main"
+
+          echo "=== Git pull ==="
+          if [ ! -d ".git" ]; then
+            git clone --depth=1 -b "$BRANCH" "$REPO_URL" .
+          else
+            git remote set-url origin "$REPO_URL"
+            git fetch --depth=1 origin "$BRANCH"
+            git reset --hard "origin/$BRANCH"
+          fi
+          git log -1 --oneline
+
+          if [ ! -d "$APP_DIR/env" ]; then
+            python3 -m venv "$APP_DIR/env"
+          fi
+
+          export APP_DIR
+          export PUBLIC_HTML
+          echo "=== Server deploy ==="
+          sed -i 's/\r$//' scripts/server-deploy.sh
+          chmod +x scripts/server-deploy.sh
+          bash scripts/server-deploy.sh
+          echo "=== Done ==="

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Семейный граф{% endblock %}
+
+{% block content %}
+<div id="app" class="app">
+    <div id="welcome-screen" class="welcome-screen">
+        <div class="welcome-screen__content">
+            <h1 class="welcome-screen__title">
+                {% if welcome %}{{ welcome.title }}{% else %}Наши корни{% endif %}
+            </h1>
+            <p class="welcome-screen__text">
+                {% if welcome %}{{ welcome.text }}{% else %}
+                Семья — это не просто слово. Это связь поколений,
+                история, которую мы несём в себе, и корни, которые
+                дают нам силу двигаться вперёд.
+                {% endif %}
+            </p>
+            <button id="welcome-close" class="welcome-screen__btn" type="button">
+                {% if welcome %}{{ welcome.button_text }}{% else %}Открыть граф{% endif %}
+            </button>
+        </div>
+    </div>
+
+    <div id="graph-container" class="graph-container graph-container--hidden">
+        <canvas id="graph-canvas"></canvas>
+        <div id="graph-labels" class="graph-labels"></div>
+        <div id="tooltip" class="tooltip" hidden></div>
+    </div>
+
+    <div id="person-popup" class="person-popup" hidden>
+        <div class="person-popup__overlay"></div>
+        <div class="person-popup__card">
+            <button class="person-popup__close" type="button" aria-label="Закрыть">&times;</button>
+            <div class="person-popup__photo-wrap">
+                <img class="person-popup__photo" src="" alt="" hidden>
+                <div class="person-popup__initials" hidden></div>
+            </div>
+            <h2 class="person-popup__name"></h2>
+            <p class="person-popup__bio"></p>
+            <a class="person-popup__link" href="#">Подробнее</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+}
+</script>
+<script type="module" src="{% static 'js/graph.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ person.full_name }} — Семейный граф{% endblock %}
+
+{% block content %}
+<div class="person-page">
+    <a href="{% url 'family:index' %}" class="person-page__back">&larr; Вернуться к графу</a>
+
+    <div class="person-page__header">
+        {% if person.photo %}
+        <img class="person-page__photo" src="{{ person.photo.url }}" alt="{{ person.full_name }}">
+        {% else %}
+        <div class="person-page__initials">{{ person.initials }}</div>
+        {% endif %}
+        <div class="person-page__info">
+            <h1 class="person-page__name">{{ person.full_name }}</h1>
+            {% if person.birth_date %}
+            <p class="person-page__dates">
+                {{ person.birth_date|date:"d.m.Y" }}
+                {% if person.death_date %} — {{ person.death_date|date:"d.m.Y" }}{% endif %}
+            </p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if person.full_bio %}
+    <div class="person-page__bio">
+        <h2>Биография</h2>
+        <p>{{ person.full_bio|linebreaks }}</p>
+    </div>
+    {% endif %}
+
+    <div class="person-page__relations">
+        {% if parents %}
+        <section class="person-page__section">
+            <h3>Родители</h3>
+            <ul>
+                {% for p in parents %}
+                <li><a href="{% url 'family:person_detail' p.pk %}">{{ p.full_name }}</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if siblings %}
+        <section class="person-page__section">
+            <h3>Братья и сёстры</h3>
+            <ul>
+                {% for p in siblings %}
+                <li><a href="{% url 'family:person_detail' p.pk %}">{{ p.full_name }}</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if children %}
+        <section class="person-page__section">
+            <h3>Дети</h3>
+            <ul>
+                {% for p in children %}
+                <li><a href="{% url 'family:person_detail' p.pk %}">{{ p.full_name }}</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
