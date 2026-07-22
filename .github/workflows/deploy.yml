@@ -42,12 +42,11 @@ jobs:
           whoami
           date
 
-          # Путь на Beget: /home/c/<login>/<site>
-          # Поменяйте familygraph на имя папки сайта на хостинге
+          # Beget: /home/c/ck78395/public_html + venv в /home/c/ck78395/env
           BASE_DIR="$HOME"
           if [ -d "/home/c/ck78395" ]; then BASE_DIR="/home/c/ck78395"; fi
-          APP_DIR="$BASE_DIR/familygraph"
-          PUBLIC_HTML="$APP_DIR/public_html"
+          APP_DIR="$BASE_DIR"
+          PUBLIC_HTML="$BASE_DIR/public_html"
 
           mkdir -p "$PUBLIC_HTML"
           cd "$PUBLIC_HTML"
@@ -72,10 +71,6 @@ jobs:
             git reset --hard "origin/$BRANCH"
           fi
           git log -1 --oneline
-
-          if [ ! -d "$APP_DIR/env" ]; then
-            python3 -m venv "$APP_DIR/env"
-          fi
 
           export APP_DIR
           export PUBLIC_HTML
