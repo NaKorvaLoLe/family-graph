@@ -98,11 +98,21 @@ echo "=== Migrate ==="
 echo "=== Collect static ==="
 "$PYTHON" manage.py collectstatic --noinput
 
+# подстраховка: css/js точно лежат в staticfiles
+mkdir -p "$PUBLIC_HTML/staticfiles/scss" "$PUBLIC_HTML/staticfiles/js"
+if [ -f "$PUBLIC_HTML/static/scss/main.css" ]; then
+  cp -f "$PUBLIC_HTML/static/scss/main.css" "$PUBLIC_HTML/staticfiles/scss/main.css"
+fi
+if [ -d "$PUBLIC_HTML/static/js" ]; then
+  cp -a "$PUBLIC_HTML/static/js/." "$PUBLIC_HTML/staticfiles/js/"
+fi
+
 mkdir -p tmp
 touch tmp/restart.txt
 
-# Timeweb: wsgi.py должен быть исполняемым
 chmod +x wsgi.py 2>/dev/null || true
+chmod 644 .htaccess 2>/dev/null || true
 
 echo "=== Deploy finished ==="
 "$PYTHON" -c "import django; print('Django', django.get_version())"
+ls -la staticfiles/scss/main.css 2>/dev/null || echo "WARN: main.css missing in staticfiles"

@@ -12,3 +12,6 @@ media/photos/
 # IDE
 .vscode/
 .idea/
+
+# SCSS source maps
+*.css.map

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 
 urlpatterns = [
@@ -8,7 +9,8 @@ urlpatterns = [
     path('', include('family.urls')),
 ]
 
-# На shared-хостинге (Beget) отдаём media даже при DEBUG=False
+# Timeweb WSGI не раздаёт static сам — всегда через Django
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-if not settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# исходники из STATICFILES_DIRS (scss/css, js), если collectstatic ещё не отработал
+urlpatterns += staticfiles_urlpatterns()
