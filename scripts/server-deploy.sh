@@ -53,16 +53,21 @@ echo "=== Install deps ==="
 "$PIP" install --upgrade pip
 "$PIP" install -r requirements.txt
 
-# .env: /home/c/ck78395/familygraph/.env или public_html/.env
-if [ -f "$APP_DIR/.env" ]; then
-  set -a
-  # shellcheck disable=SC1091
-  source "$APP_DIR/.env"
-  set +a
-elif [ -f "$PUBLIC_HTML/.env" ]; then
+# .env: public_html/.env, public_html/env (файл) или familygraph/.env
+if [ -f "$PUBLIC_HTML/.env" ]; then
   set -a
   # shellcheck disable=SC1091
   source "$PUBLIC_HTML/.env"
+  set +a
+elif [ -f "$PUBLIC_HTML/env" ] && [ ! -d "$PUBLIC_HTML/env" ]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "$PUBLIC_HTML/env"
+  set +a
+elif [ -f "$APP_DIR/.env" ]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "$APP_DIR/.env"
   set +a
 fi
 
