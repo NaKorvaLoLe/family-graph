@@ -15,3 +15,5 @@ media/photos/
 
 # SCSS source maps
 *.css.map
+
+debug.log
