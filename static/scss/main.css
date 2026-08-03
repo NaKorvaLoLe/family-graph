@@ -114,6 +114,39 @@ body:has(.app) {
   overflow: hidden;
 }
 
+.layout-hint {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 40;
+  padding: 0.5rem 0.75rem;
+  background: rgba(30, 28, 26, 0.9);
+  border: 1px solid rgba(196, 168, 130, 0.35);
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  color: #a89f94;
+  pointer-events: none;
+}
+
+.layout-toast {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 40;
+  padding: 0.5rem 0.875rem;
+  background: rgba(196, 168, 130, 0.95);
+  color: #0f0e0d;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.layout-toast[hidden] {
+  display: none;
+}
+
 .tooltip {
   position: fixed;
   z-index: 50;
