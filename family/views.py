@@ -1,6 +1,9 @@
+import json
+
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 
 from .models import (
     ParentChildRelation,
@@ -11,10 +14,15 @@ from .models import (
 )
 
 
+from django.views.decorators.csrf import ensure_csrf_cookie
+
+
+@ensure_csrf_cookie
 def index(request):
     welcome = WelcomeScreen.objects.first()
     context = {
         'welcome': welcome,
+        'can_save_layout': request.user.is_authenticated and request.user.is_superuser,
     }
     return render(request, 'family/index.html', context)
 
@@ -83,4 +91,35 @@ def graph_api(request):
             'type': 'spouse',
         })
 
-    return JsonResponse({'nodes': nodes, 'edges': edges})
+    return JsonResponse({
+        'nodes': nodes,
+        'edges': edges,
+        'can_save_layout': request.user.is_authenticated and request.user.is_superuser,
+    })
+
+
+@require_POST
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def save_positions(request):
+    """Сохранить позиции узлов. Только суперюзер; видно всем после обновления."""
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'ok': False, 'error': 'Некорректный JSON'}, status=400)
+
+    positions = payload.get('positions')
+    if not isinstance(positions, list) or not positions:
+        return JsonResponse({'ok': False, 'error': 'Нужен список positions'}, status=400)
+
+    updated = 0
+    for item in positions:
+        try:
+            person_id = int(item['id'])
+            x = float(item['x'])
+            y = float(item['y'])
+        except (KeyError, TypeError, ValueError):
+            continue
+        updated += Person.objects.filter(pk=person_id).update(graph_x=x, graph_y=y)
+
+    return JsonResponse({'ok': True, 'updated': updated})

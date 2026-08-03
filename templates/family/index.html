@@ -23,10 +23,18 @@
         </div>
     </div>
 
-    <div id="graph-container" class="graph-container graph-container--hidden">
+    <div
+        id="graph-container"
+        class="graph-container graph-container--hidden"
+        data-can-save-layout="{% if can_save_layout %}1{% else %}0{% endif %}"
+    >
         <canvas id="graph-canvas"></canvas>
         <div id="graph-labels" class="graph-labels"></div>
         <div id="tooltip" class="tooltip" hidden></div>
+        {% if can_save_layout %}
+        <div id="layout-hint" class="layout-hint">Режим редактора: позиции сохраняются после перетаскивания</div>
+        <div id="layout-toast" class="layout-toast" hidden>Позиция сохранена</div>
+        {% endif %}
     </div>
 
     <div id="person-popup" class="person-popup" hidden>

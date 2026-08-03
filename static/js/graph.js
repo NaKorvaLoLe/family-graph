@@ -2,6 +2,7 @@ import * as THREE from 'three';
 
 const NODE_RADIUS = 1.2;
 const API_URL = '/api/graph/';
+const POSITIONS_URL = '/api/graph/positions/';
 
 const welcomeScreen = document.getElementById('welcome-screen');
 const welcomeClose = document.getElementById('welcome-close');
@@ -16,6 +17,9 @@ const popupInitials = popup.querySelector('.person-popup__initials');
 const popupName = popup.querySelector('.person-popup__name');
 const popupBio = popup.querySelector('.person-popup__bio');
 const popupLink = popup.querySelector('.person-popup__link');
+const layoutToast = document.getElementById('layout-toast');
+
+const canSaveLayout = graphContainer?.dataset?.canSaveLayout === '1';
 
 let scene, camera, renderer, raycaster, mouse;
 let nodeMeshes = [];
@@ -26,6 +30,53 @@ let draggedNode = null;
 let isPanning = false;
 let panStart = { x: 0, y: 0 };
 let cameraStart = { x: 0, y: 0 };
+let toastTimer = null;
+
+function getCookie(name) {
+    const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+    return match ? decodeURIComponent(match[1]) : '';
+}
+
+function showLayoutToast(message) {
+    if (!layoutToast) return;
+    layoutToast.textContent = message;
+    layoutToast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+        layoutToast.hidden = true;
+    }, 1800);
+}
+
+async function saveNodePosition(mesh) {
+    if (!canSaveLayout || !mesh) return;
+    const csrf = getCookie('csrftoken');
+    try {
+        const response = await fetch(POSITIONS_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf,
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                positions: [{
+                    id: mesh.userData.id,
+                    x: Number(mesh.position.x.toFixed(3)),
+                    y: Number(mesh.position.y.toFixed(3)),
+                }],
+            }),
+        });
+        if (!response.ok) {
+            showLayoutToast('Не удалось сохранить');
+            return;
+        }
+        mesh.userData.x = mesh.position.x;
+        mesh.userData.y = mesh.position.y;
+        showLayoutToast('Позиция сохранена');
+    } catch {
+        showLayoutToast('Ошибка сети');
+    }
+}
 
 welcomeClose.addEventListener('click', () => {
     welcomeScreen.classList.add('welcome-screen--hidden');
@@ -279,6 +330,8 @@ function onMouseUp(event) {
 
         if (!moved) {
             showPopup(draggedNode.userData);
+        } else if (canSaveLayout) {
+            saveNodePosition(draggedNode);
         }
     }
 

@@ -8,6 +8,7 @@ $color-accent-hover: #d4bc9a;
 $color-node-bg: #2a2622;
 $color-edge-parent: #6b8f71;
 $color-edge-sibling: #8f6b7a;
+$color-edge-spouse: #c4a882;
 $color-popup-bg: #1e1c1a;
 $font-serif: 'Cormorant Garamond', Georgia, serif;
 $font-sans: 'Inter', system-ui, sans-serif;
@@ -132,6 +133,39 @@ body {
     inset: 0;
     pointer-events: none;
     overflow: hidden;
+}
+
+.layout-hint {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    z-index: 40;
+    padding: 0.5rem 0.75rem;
+    background: rgba($color-popup-bg, 0.9);
+    border: 1px solid rgba($color-accent, 0.35);
+    border-radius: 4px;
+    font-size: 0.8125rem;
+    color: $color-text-muted;
+    pointer-events: none;
+}
+
+.layout-toast {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 40;
+    padding: 0.5rem 0.875rem;
+    background: rgba($color-accent, 0.95);
+    color: $color-bg;
+    border-radius: 4px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    pointer-events: none;
+    transition: opacity $transition;
+
+    &[hidden] {
+        display: none;
+    }
 }
 
 // Tooltip
