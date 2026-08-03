@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -58,6 +59,24 @@ class ParentChildRelation(models.Model):
     def __str__(self):
         return f'{self.parent} → {self.child}'
 
+    def clean(self):
+        if self.parent_id and self.child_id:
+            if self.parent_id == self.child_id:
+                raise ValidationError('Родитель и ребёнок не могут быть одним человеком.')
+            if ParentChildRelation.objects.filter(
+                parent_id=self.parent_id,
+                child_id=self.child_id,
+            ).exclude(pk=self.pk).exists():
+                raise ValidationError('Такая связь уже существует.')
+            if ParentChildRelation.objects.filter(
+                parent_id=self.child_id,
+                child_id=self.parent_id,
+            ).exclude(pk=self.pk).exists():
+                raise ValidationError(
+                    'Обратная связь уже есть: эти люди уже связаны как родитель — ребёнок. '
+                    'Повторно добавлять связь в обратном порядке нельзя.'
+                )
+
 
 class SiblingRelation(models.Model):
     SIBLING_TYPES = [
@@ -92,6 +111,74 @@ class SiblingRelation(models.Model):
 
     def __str__(self):
         return f'{self.person_a} ↔ {self.person_b} ({self.get_relation_type_display()})'
+
+    def _ordered_ids(self):
+        a, b = self.person_a_id, self.person_b_id
+        if a and b and a > b:
+            return b, a
+        return a, b
+
+    def clean(self):
+        a, b = self._ordered_ids()
+        if a and b:
+            if a == b:
+                raise ValidationError('Нельзя связать человека с самим собой.')
+            if SiblingRelation.objects.filter(
+                person_a_id=a,
+                person_b_id=b,
+            ).exclude(pk=self.pk).exists():
+                raise ValidationError(
+                    'Связь между этими людьми уже существует '
+                    '(порядок A и B не важен).'
+                )
+
+    def save(self, *args, **kwargs):
+        if self.person_a_id and self.person_b_id and self.person_a_id > self.person_b_id:
+            self.person_a, self.person_b = self.person_b, self.person_a
+        super().save(*args, **kwargs)
+
+
+class SpouseRelation(models.Model):
+    person_a = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        related_name='spouse_relations_a',
+        verbose_name='Супруг(а) A',
+    )
+    person_b = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        related_name='spouse_relations_b',
+        verbose_name='Супруг(а) B',
+    )
+
+    class Meta:
+        verbose_name = 'Связь супругов'
+        verbose_name_plural = 'Связи супругов'
+        unique_together = ('person_a', 'person_b')
+
+    def __str__(self):
+        return f'{self.person_a} ♥ {self.person_b}'
+
+    def _ordered_ids(self):
+        a, b = self.person_a_id, self.person_b_id
+        if a and b and a > b:
+            return b, a
+        return a, b
+
+    def clean(self):
+        a, b = self._ordered_ids()
+        if a and b:
+            if a == b:
+                raise ValidationError('Нельзя связать человека с самим собой.')
+            if SpouseRelation.objects.filter(
+                person_a_id=a,
+                person_b_id=b,
+            ).exclude(pk=self.pk).exists():
+                raise ValidationError(
+                    'Связь супругов между этими людьми уже существует '
+                    '(порядок A и B не важен).'
+                )
 
     def save(self, *args, **kwargs):
         if self.person_a_id and self.person_b_id and self.person_a_id > self.person_b_id:

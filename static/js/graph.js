@@ -153,7 +153,12 @@ function autoLayout(nodes) {
 }
 
 function createEdgeLine(from, to, type) {
-    const color = type === 'parent-child' ? 0x6b8f71 : 0x8f6b7a;
+    const colors = {
+        'parent-child': 0x6b8f71,
+        sibling: 0x8f6b7a,
+        spouse: 0xc4a882,
+    };
+    const color = colors[type] || 0x888888;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array([
         from.x, from.y, -0.1,

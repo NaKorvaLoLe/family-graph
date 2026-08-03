@@ -1,6 +1,12 @@
 from django.core.management.base import BaseCommand
 
-from family.models import ParentChildRelation, Person, SiblingRelation, WelcomeScreen
+from family.models import (
+    ParentChildRelation,
+    Person,
+    SiblingRelation,
+    SpouseRelation,
+    WelcomeScreen,
+)
 
 
 class Command(BaseCommand):
@@ -87,6 +93,8 @@ class Command(BaseCommand):
         ParentChildRelation.objects.create(parent=grandfather, child=aunt)
         ParentChildRelation.objects.create(parent=grandmother, child=aunt)
         ParentChildRelation.objects.create(parent=father, child=child)
+
+        SpouseRelation.objects.create(person_a=grandfather, person_b=grandmother)
 
         SiblingRelation.objects.create(
             person_a=father, person_b=uncle, relation_type='brother_brother',

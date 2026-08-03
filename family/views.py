@@ -2,7 +2,13 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_GET
 
-from .models import ParentChildRelation, Person, SiblingRelation, WelcomeScreen
+from .models import (
+    ParentChildRelation,
+    Person,
+    SiblingRelation,
+    SpouseRelation,
+    WelcomeScreen,
+)
 
 
 def index(request):
@@ -22,11 +28,17 @@ def person_detail(request, pk):
     ) | Person.objects.filter(
         sibling_relations_b__person_a=person
     )
+    spouses = Person.objects.filter(
+        spouse_relations_a__person_b=person
+    ) | Person.objects.filter(
+        spouse_relations_b__person_a=person
+    )
     context = {
         'person': person,
         'parents': parents.distinct(),
         'children': children.distinct(),
         'siblings': siblings.distinct(),
+        'spouses': spouses.distinct(),
     }
     return render(request, 'family/person_detail.html', context)
 
@@ -62,6 +74,13 @@ def graph_api(request):
             'target': rel.person_b_id,
             'type': 'sibling',
             'subtype': rel.relation_type,
+        })
+
+    for rel in SpouseRelation.objects.select_related('person_a', 'person_b'):
+        edges.append({
+            'source': rel.person_a_id,
+            'target': rel.person_b_id,
+            'type': 'spouse',
         })
 
     return JsonResponse({'nodes': nodes, 'edges': edges})

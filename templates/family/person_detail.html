@@ -42,6 +42,17 @@
         </section>
         {% endif %}
 
+        {% if spouses %}
+        <section class="person-page__section">
+            <h3>Супруг(а)</h3>
+            <ul>
+                {% for p in spouses %}
+                <li><a href="{% url 'family:person_detail' p.pk %}">{{ p.full_name }}</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
         {% if siblings %}
         <section class="person-page__section">
             <h3>Братья и сёстры</h3>
