@@ -1,17 +1,13 @@
 #!/home/c/ck78395/familygraph/env/bin/python
-"""WSGI entry for Timeweb (как у webworklife / blog)."""
+"""Точка входа Timeweb (mod_wsgi) — по официальной инструкции."""
 import os
 import sys
-import traceback
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parent
 APP_DIR = PROJECT_DIR.parent
 VENV_DIR = APP_DIR / 'env'
 ERROR_LOG = PROJECT_DIR / 'wsgi_error.log'
-
-# Timeweb отдаёт HTTPS на прокси — Django должен считать запросы secure
-os.environ['HTTPS'] = 'on'
 
 
 def _log(msg: str) -> None:
@@ -22,53 +18,53 @@ def _log(msg: str) -> None:
         pass
 
 
-def _load_env(path: Path) -> None:
-    if not path.is_file():
-        return
-    try:
-        text = path.read_text(encoding='utf-8')
-    except OSError as exc:
-        _log(f'Cannot read {path}: {exc}')
-        return
-    for line in text.splitlines():
-        line = line.strip()
-        if not line or line.startswith('#') or '=' not in line:
-            continue
-        key, _, value = line.partition('=')
-        key = key.strip()
-        value = value.strip().strip('"').strip("'")
-        if key:
-            os.environ.setdefault(key, value)
-
-
 try:
-    if str(PROJECT_DIR) not in sys.path:
-        sys.path.insert(0, str(PROJECT_DIR))
+    # 1) Активация venv (как требует Timeweb)
+    activate_this = VENV_DIR / 'bin' / 'activate_this.py'
+    if activate_this.is_file():
+        exec(
+            compile(activate_this.read_text(encoding='utf-8'), str(activate_this), 'exec'),
+            {'__file__': str(activate_this)},
+        )
+    else:
+        # python -m venv не создаёт activate_this.py — добавляем site-packages вручную
+        site = VENV_DIR / 'lib'
+        if site.exists():
+            for pkg in sorted(site.glob('python*/site-packages'), reverse=True):
+                sys.path.insert(0, str(pkg))
+                break
+        venv_python = VENV_DIR / 'bin' / 'python'
+        if venv_python.exists():
+            os.environ['VIRTUAL_ENV'] = str(VENV_DIR)
 
-    venv_site = VENV_DIR / 'lib'
-    if venv_site.exists():
-        for site in sorted(venv_site.glob('python*/site-packages'), reverse=True):
-            sys.path.insert(0, str(site))
-            break
+    # 2) Корень проекта
+    project_path = str(PROJECT_DIR)
+    if project_path not in sys.path:
+        sys.path.insert(0, project_path)
 
-    _load_env(PROJECT_DIR / '.env')
-    if (PROJECT_DIR / 'env').is_file():
-        _load_env(PROJECT_DIR / 'env')
-    _load_env(APP_DIR / '.env')
+    # 3) SQLite на Python 3.10 + mod_wsgi очень медленный (логин «висит»)
+    try:
+        __import__('pysqlite3')
+        sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+    except ImportError:
+        pass
 
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+    os.environ['HTTPS'] = 'on'
 
     from django.core.wsgi import get_wsgi_application
 
-    _django_app = get_wsgi_application()
+    _app = get_wsgi_application()
 
     def application(environ, start_response):
-        # На всякий случай фиксируем схему для CSRF/сессий
         environ['wsgi.url_scheme'] = 'https'
         environ['HTTPS'] = 'on'
-        return _django_app(environ, start_response)
+        if 'HTTP_X_FORWARDED_PROTO' not in environ:
+            environ['HTTP_X_FORWARDED_PROTO'] = 'https'
+        return _app(environ, start_response)
 
 except Exception:
-    _log('=== wsgi.py crash ===')
+    _log('=== wsgi.py crash ===\n')
+    import traceback
     _log(traceback.format_exc())
     raise

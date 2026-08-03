@@ -4,6 +4,31 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _load_dotenv() -> None:
+    """Читаем .env и для manage.py, и для wsgi — одна и та же БД."""
+    candidates = [
+        BASE_DIR / '.env',
+        BASE_DIR / 'env',
+        BASE_DIR.parent / '.env',
+    ]
+    for path in candidates:
+        if not path.is_file():
+            continue
+        for line in path.read_text(encoding='utf-8').splitlines():
+            line = line.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            key, _, value = line.partition('=')
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key:
+                os.environ.setdefault(key, value)
+        break
+
+
+_load_dotenv()
+
+
 def _env(key, default=None):
     return os.environ.get(key, default)
 
@@ -30,7 +55,6 @@ CSRF_TRUSTED_ORIGINS = [
     for origin in _env('CSRF_TRUSTED_ORIGINS', '').split(',')
     if origin.strip()
 ]
-# Автоматически для HTTPS-доменов (иначе логин в админку ломается)
 if not CSRF_TRUSTED_ORIGINS:
     CSRF_TRUSTED_ORIGINS = [
         f'https://{host}'
@@ -79,7 +103,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# SQLite локально; MySQL на Timeweb — если задан DB_NAME
+# MySQL на сервере (DB_NAME в .env). Без него — SQLite.
 if _env('DB_NAME'):
     DATABASES = {
         'default': {
@@ -87,7 +111,7 @@ if _env('DB_NAME'):
             'NAME': _env('DB_NAME'),
             'USER': _env('DB_USER', ''),
             'PASSWORD': _env('DB_PASSWORD', ''),
-            'HOST': _env('DB_HOST', 'localhost'),
+            'HOST': _env('DB_HOST', '127.0.0.1'),
             'PORT': _env('DB_PORT', '3306'),
             'OPTIONS': {
                 'charset': 'utf8mb4',
@@ -136,16 +160,17 @@ STATICFILES_FINDERS = [
 SASS_PROCESSOR_ROOT = BASE_DIR / 'static'
 SASS_PROCESSOR_ENABLED = True
 
-# Timeweb: HTTPS терминируется на прокси — без этого логин уходит в http:// и сессия «теряется»
+# Timeweb HTTPS через прокси
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_HTTPONLY = True
+SESSION_SAVE_EVERY_REQUEST = True
 
-# Для genbu.ru сайт всегда по HTTPS
-SESSION_COOKIE_SECURE = _env_bool('DJANGO_COOKIE_SECURE', True)
-CSRF_COOKIE_SECURE = _env_bool('DJANGO_COOKIE_SECURE', True)
+# По умолчанию False: на Timeweb часто ломает логин (сессия не «липнет»).
+# В .env можно поставить DJANGO_COOKIE_SECURE=True после проверки входа.
+SESSION_COOKIE_SECURE = _env_bool('DJANGO_COOKIE_SECURE', False)
+CSRF_COOKIE_SECURE = _env_bool('DJANGO_COOKIE_SECURE', False)
 
-if not DEBUG:
-    SECURE_SSL_REDIRECT = False  # редирект делает Timeweb, не Django
+SECURE_SSL_REDIRECT = False

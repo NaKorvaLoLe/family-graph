@@ -2,9 +2,7 @@ Options +ExecCGI
 AddHandler wsgi-script .py
 
 RewriteEngine On
-
-# collectstatic → staticfiles/; URL остаётся /static/...
 RewriteRule ^static/(.*)$ staticfiles/$1 [L]
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ /wsgi.py/$1 [QSA,L,PT]
+RewriteRule ^(.*)$ /wsgi.py/$1 [QSA,PT]
