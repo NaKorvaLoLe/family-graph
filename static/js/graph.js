@@ -7,6 +7,11 @@ const POSITIONS_URL = '/api/graph/positions/';
 const welcomeScreen = document.getElementById('welcome-screen');
 const welcomeClose = document.getElementById('welcome-close');
 const welcomeReopen = document.getElementById('welcome-reopen');
+const helpOpen = document.getElementById('help-open');
+const helpOpenPopup = document.getElementById('help-open-popup');
+const helpModal = document.getElementById('help-modal');
+const helpOverlay = helpModal?.querySelector('.help-modal__overlay');
+const helpClose = helpModal?.querySelector('.help-modal__close');
 const graphContainer = document.getElementById('graph-container');
 const canvas = document.getElementById('graph-canvas');
 const tooltip = document.getElementById('tooltip');
@@ -124,7 +129,36 @@ welcomeClose.addEventListener('click', () => {
 
 welcomeReopen?.addEventListener('click', () => {
     closePopup();
+    closeHelp();
     showWelcome();
+});
+
+function openHelp() {
+    if (!helpModal) return;
+    helpModal.hidden = false;
+}
+
+function closeHelp() {
+    if (!helpModal) return;
+    helpModal.hidden = true;
+}
+
+helpOpen?.addEventListener('click', () => {
+    closePopup();
+    openHelp();
+});
+helpOpenPopup?.addEventListener('click', () => {
+    closePopup();
+    openHelp();
+});
+helpClose?.addEventListener('click', closeHelp);
+helpOverlay?.addEventListener('click', closeHelp);
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        closeHelp();
+        closePopup();
+    }
 });
 
 function hasSeenWelcome() {

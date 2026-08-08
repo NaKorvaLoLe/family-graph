@@ -28,9 +28,14 @@
         class="graph-container graph-container--hidden"
         data-can-save-layout="{% if can_save_layout %}1{% else %}0{% endif %}"
     >
-        <button id="welcome-reopen" class="welcome-reopen" type="button" title="Показать приветствие">
-            О проекте
-        </button>
+        <div class="graph-toolbar">
+            <button id="welcome-reopen" class="welcome-reopen" type="button" title="Показать приветствие">
+                О проекте
+            </button>
+            <button id="help-open" class="welcome-reopen" type="button" title="Справка по графу">
+                Справка
+            </button>
+        </div>
         <canvas id="graph-canvas"></canvas>
         <div id="graph-labels" class="graph-labels"></div>
         <div id="tooltip" class="tooltip" hidden></div>
@@ -51,7 +56,65 @@
             <h2 class="person-popup__name"></h2>
             <p class="person-popup__dates" hidden></p>
             <p class="person-popup__bio"></p>
-            <a class="person-popup__link" href="#">Подробнее</a>
+            <div class="person-popup__actions">
+                <a class="person-popup__link" href="#">Подробнее</a>
+                <button id="help-open-popup" class="person-popup__help" type="button">Справка по графу</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="help-modal" class="help-modal" hidden>
+        <div class="help-modal__overlay"></div>
+        <div class="help-modal__card" role="dialog" aria-labelledby="help-modal-title">
+            <button class="help-modal__close" type="button" aria-label="Закрыть">&times;</button>
+            <h2 id="help-modal-title" class="help-modal__title">Как читать граф</h2>
+
+            <section class="help-modal__section">
+                <h3>Цвета связей</h3>
+                <ul class="help-legend">
+                    <li>
+                        <span class="help-legend__line help-legend__line--parent"></span>
+                        <span><strong>Зелёная</strong> — родитель ↔ ребёнок</span>
+                    </li>
+                    <li>
+                        <span class="help-legend__line help-legend__line--sibling"></span>
+                        <span><strong>Розовая</strong> — братья и сёстры</span>
+                    </li>
+                    <li>
+                        <span class="help-legend__line help-legend__line--spouse"></span>
+                        <span><strong>Золотистая</strong> — супруги</span>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="help-modal__section">
+                <h3>Что значит «?»</h3>
+                <ul class="help-list">
+                    <li>В имени (например, <em>? И.П.</em>) — фамилия неизвестна</li>
+                    <li>В датах (<em>? — 1980</em> или <em>1936 — ?</em>) — дата рождения или смерти неизвестна</li>
+                    <li><em>род. неизвестна</em> / <em>ум. неизвестна</em> — известна только одна сторона, и она помечена как неизвестная</li>
+                </ul>
+            </section>
+
+            <section class="help-modal__section">
+                <h3>Подписи на кружках</h3>
+                <ul class="help-list">
+                    <li>Формат: <em>Фамилия И.О.</em> — например, Вавилов А.В.</li>
+                    <li>Если фото нет — показываются фамилия и инициалы</li>
+                    <li>Наведение на узел — полное ФИО</li>
+                    <li>Клик по узлу — краткая карточка человека</li>
+                </ul>
+            </section>
+
+            <section class="help-modal__section">
+                <h3>Управление</h3>
+                <ul class="help-list">
+                    <li>Перетаскивание фона — перемещение по графу</li>
+                    <li>Колёсико мыши — масштаб</li>
+                    <li>Перетаскивание узла — временно сдвинуть человека</li>
+                    <li>Положение «камеры» запоминается в браузере</li>
+                </ul>
+            </section>
         </div>
     </div>
 </div>
