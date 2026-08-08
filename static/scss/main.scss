@@ -128,6 +128,29 @@ body {
     }
 }
 
+.welcome-reopen {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 45;
+    font-family: $font-sans;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid rgba($color-accent, 0.45);
+    background: rgba($color-popup-bg, 0.9);
+    color: $color-accent;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background $transition, border-color $transition, color $transition;
+
+    &:hover {
+        background: rgba($color-accent, 0.15);
+        border-color: $color-accent;
+        color: $color-accent-hover;
+    }
+}
+
 .graph-labels {
     position: absolute;
     inset: 0;

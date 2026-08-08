@@ -6,6 +6,7 @@ const POSITIONS_URL = '/api/graph/positions/';
 
 const welcomeScreen = document.getElementById('welcome-screen');
 const welcomeClose = document.getElementById('welcome-close');
+const welcomeReopen = document.getElementById('welcome-reopen');
 const graphContainer = document.getElementById('graph-container');
 const canvas = document.getElementById('graph-canvas');
 const tooltip = document.getElementById('tooltip');
@@ -21,7 +22,9 @@ const popupLink = popup.querySelector('.person-popup__link');
 const layoutToast = document.getElementById('layout-toast');
 
 const CAMERA_STORAGE_KEY = 'familyGraph.camera';
+const WELCOME_STORAGE_KEY = 'familyGraph.welcomeSeen';
 const canSaveLayout = graphContainer?.dataset?.canSaveLayout === '1';
+let graphInitialized = false;
 
 function saveCameraState() {
     if (!camera) return;
@@ -111,10 +114,41 @@ async function saveNodePosition(mesh) {
 }
 
 welcomeClose.addEventListener('click', () => {
+    try {
+        localStorage.setItem(WELCOME_STORAGE_KEY, '1');
+    } catch {
+        // ignore
+    }
+    hideWelcomeAndShowGraph();
+});
+
+welcomeReopen?.addEventListener('click', () => {
+    closePopup();
+    showWelcome();
+});
+
+function hasSeenWelcome() {
+    try {
+        return localStorage.getItem(WELCOME_STORAGE_KEY) === '1';
+    } catch {
+        return false;
+    }
+}
+
+function showWelcome() {
+    welcomeScreen.classList.remove('welcome-screen--hidden');
+    graphContainer.classList.add('graph-container--hidden');
+}
+
+function hideWelcomeAndShowGraph() {
     welcomeScreen.classList.add('welcome-screen--hidden');
     graphContainer.classList.remove('graph-container--hidden');
     initGraph();
-});
+}
+
+if (hasSeenWelcome()) {
+    hideWelcomeAndShowGraph();
+}
 
 popupClose.addEventListener('click', closePopup);
 popupOverlay.addEventListener('click', closePopup);
@@ -422,6 +456,9 @@ function onWheel(event) {
 }
 
 async function initGraph() {
+    if (graphInitialized) return;
+    graphInitialized = true;
+
     const response = await fetch(API_URL);
     graphData = await response.json();
 

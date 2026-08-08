@@ -107,6 +107,29 @@ body:has(.app) {
   height: 100%;
 }
 
+.welcome-reopen {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 45;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid rgba(196, 168, 130, 0.45);
+  background: rgba(30, 28, 26, 0.9);
+  color: #c4a882;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.welcome-reopen:hover {
+  background: rgba(196, 168, 130, 0.15);
+  border-color: #c4a882;
+  color: #d4bc9a;
+}
+
 .graph-labels {
   position: absolute;
   inset: 0;
