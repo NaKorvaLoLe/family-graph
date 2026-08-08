@@ -89,7 +89,11 @@ class Person(models.Model):
         death = self.death_display
         if birth and death:
             return f'{birth} — {death}'
-        return birth or death
+        if birth:
+            return f'род. {birth}'
+        if death:
+            return f'ум. {death}'
+        return ''
 
 
 class ParentChildRelation(models.Model):
