@@ -28,11 +28,21 @@ class Person(models.Model):
         default=False,
         help_text='Если отмечено, на сайте покажется только год (например, 1936), без дня и месяца.',
     )
+    birth_unknown = models.BooleanField(
+        'Дата рождения неизвестна',
+        default=False,
+        help_text='Если отмечено, на сайте будет показано, что дата рождения неизвестна.',
+    )
     death_date = models.DateField('Дата смерти', blank=True, null=True)
     death_year_only = models.BooleanField(
         'Известен только год смерти',
         default=False,
         help_text='Если отмечено, на сайте покажется только год смерти.',
+    )
+    death_unknown = models.BooleanField(
+        'Дата смерти неизвестна',
+        default=False,
+        help_text='Если отмечено, на сайте будет показано, что дата смерти неизвестна.',
     )
     short_bio = models.TextField(
         'Краткая информация',
@@ -109,15 +119,34 @@ class Person(models.Model):
 
     @property
     def lifespan_display(self):
-        birth = self.birth_display
-        death = self.death_display
+        if self.birth_unknown:
+            birth = '?'
+        else:
+            birth = self.birth_display
+
+        if self.death_unknown:
+            death = '?'
+        else:
+            death = self.death_display
+
+        if birth == '?' and death == '?':
+            return 'даты неизвестны'
         if birth and death:
             return f'{birth} — {death}'
         if birth:
-            return f'род. {birth}'
+            return 'род. неизвестна' if birth == '?' else f'род. {birth}'
         if death:
-            return f'ум. {death}'
+            return 'ум. неизвестна' if death == '?' else f'ум. {death}'
         return ''
+
+    def clean(self):
+        errors = {}
+        if self.birth_unknown and self.birth_year_only:
+            errors['birth_year_only'] = 'Нельзя одновременно отметить «неизвестна» и «только год».'
+        if self.death_unknown and self.death_year_only:
+            errors['death_year_only'] = 'Нельзя одновременно отметить «неизвестна» и «только год».'
+        if errors:
+            raise ValidationError(errors)
 
 
 class ParentChildRelation(models.Model):

@@ -17,8 +17,10 @@ class PersonAdmin(admin.ModelAdmin):
         'middle_name',
         'birth_date',
         'birth_year_only',
+        'birth_unknown',
         'death_date',
         'death_year_only',
+        'death_unknown',
         'graph_x',
         'graph_y',
     )
@@ -28,13 +30,21 @@ class PersonAdmin(admin.ModelAdmin):
         'middle_name',
         'birth_date',
         'birth_year_only',
+        'birth_unknown',
         'death_date',
         'death_year_only',
+        'death_unknown',
         'graph_x',
         'graph_y',
     )
     search_fields = ('first_name', 'last_name', 'middle_name')
-    list_filter = ('birth_year_only', 'death_year_only', 'birth_date')
+    list_filter = (
+        'birth_unknown',
+        'death_unknown',
+        'birth_year_only',
+        'death_year_only',
+        'birth_date',
+    )
     list_per_page = 50
     fieldsets = (
         ('Основная информация', {
@@ -52,13 +62,15 @@ class PersonAdmin(admin.ModelAdmin):
             'fields': (
                 'birth_date',
                 'birth_year_only',
+                'birth_unknown',
                 'death_date',
                 'death_year_only',
+                'death_unknown',
             ),
             'description': (
                 'Можно указать только рождение, только смерть или обе даты. '
-                'Если известен только год — поставьте 01.01.YYYY и отметьте «только год». '
-                'Неизвестную дату просто оставьте пустой.'
+                'Если дата неизвестна — отметьте соответствующую галочку. '
+                'Если известен только год — поставьте 01.01.YYYY и отметьте «только год».'
             ),
         }),
         ('Биография', {
