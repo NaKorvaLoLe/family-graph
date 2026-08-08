@@ -21,6 +21,7 @@ const popupLink = popup.querySelector('.person-popup__link');
 const layoutToast = document.getElementById('layout-toast');
 
 const CAMERA_STORAGE_KEY = 'familyGraph.camera';
+const canSaveLayout = graphContainer?.dataset?.canSaveLayout === '1';
 
 function saveCameraState() {
     if (!camera) return;
