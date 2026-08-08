@@ -16,7 +16,9 @@ class PersonAdmin(admin.ModelAdmin):
         'first_name',
         'middle_name',
         'birth_date',
+        'birth_year_only',
         'death_date',
+        'death_year_only',
         'graph_x',
         'graph_y',
     )
@@ -25,12 +27,14 @@ class PersonAdmin(admin.ModelAdmin):
         'first_name',
         'middle_name',
         'birth_date',
+        'birth_year_only',
         'death_date',
+        'death_year_only',
         'graph_x',
         'graph_y',
     )
     search_fields = ('first_name', 'last_name', 'middle_name')
-    list_filter = ('birth_date',)
+    list_filter = ('birth_year_only', 'death_year_only', 'birth_date')
     list_per_page = 50
     fieldsets = (
         ('Основная информация', {
@@ -39,8 +43,18 @@ class PersonAdmin(admin.ModelAdmin):
                 'first_name',
                 'middle_name',
                 'photo',
+            ),
+        }),
+        ('Даты', {
+            'fields': (
                 'birth_date',
+                'birth_year_only',
                 'death_date',
+                'death_year_only',
+            ),
+            'description': (
+                'Если известен только год — укажите любую дату этого года '
+                '(удобно 01.01.YYYY) и отметьте «только год».'
             ),
         }),
         ('Биография', {

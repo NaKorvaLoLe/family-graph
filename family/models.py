@@ -8,7 +8,17 @@ class Person(models.Model):
     middle_name = models.CharField('Отчество', max_length=100, blank=True)
     photo = models.ImageField('Фото', upload_to='photos/', blank=True, null=True)
     birth_date = models.DateField('Дата рождения', blank=True, null=True)
+    birth_year_only = models.BooleanField(
+        'Известен только год рождения',
+        default=False,
+        help_text='Если отмечено, на сайте покажется только год (например, 1936), без дня и месяца.',
+    )
     death_date = models.DateField('Дата смерти', blank=True, null=True)
+    death_year_only = models.BooleanField(
+        'Известен только год смерти',
+        default=False,
+        help_text='Если отмечено, на сайте покажется только год смерти.',
+    )
     short_bio = models.TextField(
         'Краткая информация',
         max_length=500,
@@ -56,6 +66,30 @@ class Person(models.Model):
         if self.middle_name:
             parts.append(self.middle_name)
         return ' '.join(p for p in parts if p)
+
+    @staticmethod
+    def _format_date(value, year_only):
+        if not value:
+            return ''
+        if year_only:
+            return str(value.year)
+        return value.strftime('%d.%m.%Y')
+
+    @property
+    def birth_display(self):
+        return self._format_date(self.birth_date, self.birth_year_only)
+
+    @property
+    def death_display(self):
+        return self._format_date(self.death_date, self.death_year_only)
+
+    @property
+    def lifespan_display(self):
+        birth = self.birth_display
+        death = self.death_display
+        if birth and death:
+            return f'{birth} — {death}'
+        return birth or death
 
 
 class ParentChildRelation(models.Model):

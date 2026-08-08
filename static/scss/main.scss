@@ -272,7 +272,17 @@ body {
         font-family: $font-serif;
         font-size: 1.35rem;
         color: $color-accent;
+        margin-bottom: 0.35rem;
+    }
+
+    &__dates {
+        font-size: 0.875rem;
+        color: $color-text-muted;
         margin-bottom: 0.75rem;
+
+        &[hidden] {
+            display: none;
+        }
     }
 
     &__bio {

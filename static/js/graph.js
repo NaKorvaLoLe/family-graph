@@ -15,6 +15,7 @@ const popupClose = popup.querySelector('.person-popup__close');
 const popupPhoto = popup.querySelector('.person-popup__photo');
 const popupInitials = popup.querySelector('.person-popup__initials');
 const popupName = popup.querySelector('.person-popup__name');
+const popupDates = popup.querySelector('.person-popup__dates');
 const popupBio = popup.querySelector('.person-popup__bio');
 const popupLink = popup.querySelector('.person-popup__link');
 const layoutToast = document.getElementById('layout-toast');
@@ -93,6 +94,15 @@ function closePopup() {
 
 function showPopup(nodeData) {
     popupName.textContent = nodeData.full_name;
+    if (popupDates) {
+        if (nodeData.lifespan) {
+            popupDates.textContent = nodeData.lifespan;
+            popupDates.hidden = false;
+        } else {
+            popupDates.textContent = '';
+            popupDates.hidden = true;
+        }
+    }
     popupBio.textContent = nodeData.short_bio || 'Информация пока не добавлена.';
     popupLink.href = nodeData.detail_url;
 

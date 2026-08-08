@@ -65,6 +65,7 @@ def graph_api(request):
             'initials': person.initials,
             'photo_url': person.photo.url if person.photo else None,
             'short_bio': person.short_bio,
+            'lifespan': person.lifespan_display,
             'detail_url': f'/person/{person.pk}/',
             'x': person.graph_x,
             'y': person.graph_y,

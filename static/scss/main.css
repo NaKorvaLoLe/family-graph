@@ -250,7 +250,17 @@ body:has(.app) {
   font-family: "Cormorant Garamond", Georgia, serif;
   font-size: 1.35rem;
   color: #c4a882;
+  margin-bottom: 0.35rem;
+}
+
+.person-popup__dates {
+  font-size: 0.875rem;
+  color: #a89f94;
   margin-bottom: 0.75rem;
+}
+
+.person-popup__dates[hidden] {
+  display: none;
 }
 
 .person-popup__bio {

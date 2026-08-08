@@ -14,11 +14,8 @@
         {% endif %}
         <div class="person-page__info">
             <h1 class="person-page__name">{{ person.full_name }}</h1>
-            {% if person.birth_date %}
-            <p class="person-page__dates">
-                {{ person.birth_date|date:"d.m.Y" }}
-                {% if person.death_date %} — {{ person.death_date|date:"d.m.Y" }}{% endif %}
-            </p>
+            {% if person.lifespan_display %}
+            <p class="person-page__dates">{{ person.lifespan_display }}</p>
             {% endif %}
         </div>
     </div>
