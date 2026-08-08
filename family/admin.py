@@ -44,6 +44,9 @@ class PersonAdmin(admin.ModelAdmin):
                 'middle_name',
                 'photo',
             ),
+            'description': (
+                'Имя, фамилию или отчество можно не заполнять, если неизвестны.'
+            ),
         }),
         ('Даты', {
             'fields': (

@@ -3,9 +3,24 @@ from django.db import models
 
 
 class Person(models.Model):
-    first_name = models.CharField('Имя', max_length=100)
-    last_name = models.CharField('Фамилия', max_length=100)
-    middle_name = models.CharField('Отчество', max_length=100, blank=True)
+    first_name = models.CharField(
+        'Имя',
+        max_length=100,
+        blank=True,
+        help_text='Можно оставить пустым, если имя неизвестно.',
+    )
+    last_name = models.CharField(
+        'Фамилия',
+        max_length=100,
+        blank=True,
+        help_text='Можно оставить пустым, если фамилия неизвестна.',
+    )
+    middle_name = models.CharField(
+        'Отчество',
+        max_length=100,
+        blank=True,
+        help_text='Можно оставить пустым, если отчество неизвестно.',
+    )
     photo = models.ImageField('Фото', upload_to='photos/', blank=True, null=True)
     birth_date = models.DateField('Дата рождения', blank=True, null=True)
     birth_year_only = models.BooleanField(
@@ -49,11 +64,17 @@ class Person(models.Model):
 
     @property
     def node_label(self):
-        """Подпись на узле графа: Вавилов А.В."""
+        """Подпись на узле: Вавилов А.В. Неизвестные части заменяются на ?"""
+        last = (self.last_name or '').strip() or '?'
         initials = self.name_initials
         if initials:
-            return f'{self.last_name} {initials}'.strip()
-        return self.last_name
+            return f'{last} {initials}'.strip()
+        first = (self.first_name or '').strip()
+        if first:
+            return f'{last} {first}'.strip() if last != '?' else first
+        if last != '?':
+            return last
+        return 'Неизвестный'
 
     @property
     def initials(self):
@@ -62,10 +83,13 @@ class Person(models.Model):
 
     @property
     def full_name(self):
-        parts = [self.last_name, self.first_name]
-        if self.middle_name:
-            parts.append(self.middle_name)
-        return ' '.join(p for p in parts if p)
+        parts = [
+            (self.last_name or '').strip(),
+            (self.first_name or '').strip(),
+            (self.middle_name or '').strip(),
+        ]
+        known = [p for p in parts if p]
+        return ' '.join(known) if known else 'Неизвестный'
 
     @staticmethod
     def _format_date(value, year_only):
