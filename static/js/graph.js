@@ -20,7 +20,37 @@ const popupBio = popup.querySelector('.person-popup__bio');
 const popupLink = popup.querySelector('.person-popup__link');
 const layoutToast = document.getElementById('layout-toast');
 
-const canSaveLayout = graphContainer?.dataset?.canSaveLayout === '1';
+const CAMERA_STORAGE_KEY = 'familyGraph.camera';
+
+function saveCameraState() {
+    if (!camera) return;
+    try {
+        localStorage.setItem(CAMERA_STORAGE_KEY, JSON.stringify({
+            x: camera.position.x,
+            y: camera.position.y,
+            zoom: camera.zoom,
+        }));
+    } catch {
+        // ignore quota / private mode
+    }
+}
+
+function restoreCameraState() {
+    if (!camera) return;
+    try {
+        const raw = localStorage.getItem(CAMERA_STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (typeof data.x === 'number') camera.position.x = data.x;
+        if (typeof data.y === 'number') camera.position.y = data.y;
+        if (typeof data.zoom === 'number') {
+            camera.zoom = THREE.MathUtils.clamp(data.zoom, 0.3, 5);
+            camera.updateProjectionMatrix();
+        }
+    } catch {
+        // ignore bad data
+    }
+}
 
 let scene, camera, renderer, raycaster, mouse;
 let nodeMeshes = [];
@@ -147,14 +177,14 @@ function createLabelTexture(label) {
     ctx.fillStyle = '#c4a882';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = '600 28px Cormorant Garamond, Georgia, serif';
+    ctx.font = '600 40px Cormorant Garamond, Georgia, serif';
 
     if (lines.length === 1) {
-        ctx.fillText(lines[0], cx, cy + 2, size * 0.72);
+        ctx.fillText(lines[0], cx, cy + 2, size * 0.78);
     } else {
-        ctx.fillText(lines[0], cx, cy - 18, size * 0.72);
-        ctx.font = '600 24px Cormorant Garamond, Georgia, serif';
-        ctx.fillText(lines[1], cx, cy + 22, size * 0.72);
+        ctx.fillText(lines[0], cx, cy - 22, size * 0.78);
+        ctx.font = '600 34px Cormorant Garamond, Georgia, serif';
+        ctx.fillText(lines[1], cx, cy + 26, size * 0.78);
     }
 
     const texture = new THREE.CanvasTexture(canvasEl);
@@ -349,6 +379,8 @@ function onMouseDown(event) {
 function onMouseUp(event) {
     if (event.button !== 0) return;
 
+    const wasPanning = isPanning;
+
     if (draggedNode && !isPanning) {
         const moved =
             Math.abs(draggedNode.position.x - draggedNode.userData._startX) > 0.05 ||
@@ -364,6 +396,10 @@ function onMouseUp(event) {
     draggedNode = null;
     isPanning = false;
     canvas.style.cursor = hoveredNode ? 'pointer' : 'grab';
+
+    if (wasPanning) {
+        saveCameraState();
+    }
 }
 
 function onMouseDownTrackStart(event) {
@@ -381,6 +417,7 @@ function onWheel(event) {
     const zoomFactor = event.deltaY > 0 ? 1.1 : 0.9;
     camera.zoom = THREE.MathUtils.clamp(camera.zoom * (1 / zoomFactor), 0.3, 5);
     camera.updateProjectionMatrix();
+    saveCameraState();
 }
 
 async function initGraph() {
@@ -401,6 +438,7 @@ async function initGraph() {
         100,
     );
     camera.position.z = 10;
+    restoreCameraState();
 
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
