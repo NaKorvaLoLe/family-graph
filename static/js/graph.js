@@ -118,11 +118,10 @@ function createLabelTexture(label) {
     const ctx = canvasEl.getContext('2d');
     const cx = size / 2;
     const cy = size / 2;
-    const radius = size / 2;
 
     ctx.fillStyle = '#2a2622';
     ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.strokeStyle = '#c4a882';
@@ -131,83 +130,25 @@ function createLabelTexture(label) {
 
     const text = (label || '').trim() || '?';
     const parts = text.split(/\s+/).filter(Boolean);
-    let lines;
-    if (parts.length >= 2) {
-        lines = [parts[0], parts.slice(1).join(' ')];
-    } else if (text.length > 10) {
-        const mid = Math.ceil(text.length / 2);
-        lines = [text.slice(0, mid), text.slice(mid)];
-    } else {
-        lines = [text];
-    }
-
-    // ширина хорды круга на заданной высоте (с отступом от края)
-    const chordWidth = (offsetY) => {
-        const r = radius * 0.86;
-        const y = Math.min(Math.abs(offsetY), r - 2);
-        return 2 * Math.sqrt(Math.max(r * r - y * y, 1)) * 0.92;
-    };
-
-    const fitFont = (content, offsetY, maxPx, minPx) => {
-        const maxW = chordWidth(offsetY);
-        let px = maxPx;
-        while (px > minPx) {
-            ctx.font = `600 ${px}px Cormorant Garamond, Georgia, serif`;
-            if (ctx.measureText(content).width <= maxW) break;
-            px -= 1;
-        }
-        return px;
-    };
-
-    // если фамилия всё ещё не влезает — режем на 2 строки
-    const ensureFit = (line, offsetY) => {
-        let px = fitFont(line, offsetY, lines.length > 1 ? 54 : 64, 14);
-        ctx.font = `600 ${px}px Cormorant Garamond, Georgia, serif`;
-        if (ctx.measureText(line).width <= chordWidth(offsetY) || line.length < 8) {
-            return [line];
-        }
-        const breakAt = Math.ceil(line.length / 2);
-        return [line.slice(0, breakAt), line.slice(breakAt)];
-    };
-
-    let drawLines = [];
-    if (lines.length === 1) {
-        drawLines = ensureFit(lines[0], 0).map((t) => ({ text: t }));
-    } else {
-        const top = ensureFit(lines[0], -28);
-        const bottom = ensureFit(lines[1], 32);
-        drawLines = [
-            ...top.map((t) => ({ text: t, group: 'top' })),
-            ...bottom.map((t) => ({ text: t, group: 'bottom' })),
-        ];
-    }
+    const lines = parts.length >= 2
+        ? [parts[0], parts.slice(1).join(' ')]
+        : [text];
 
     ctx.fillStyle = '#c4a882';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius * 0.9, 0, Math.PI * 2);
-    ctx.clip();
+    ctx.font = '600 28px Cormorant Garamond, Georgia, serif';
 
-    const total = drawLines.length;
-    const lineGap = total <= 2 ? 46 : 36;
-    const blockHeight = (total - 1) * lineGap;
-    const startY = cy - blockHeight / 2;
-
-    drawLines.forEach((line, i) => {
-        const y = startY + i * lineGap;
-        const offsetY = y - cy;
-        const px = fitFont(line.text, offsetY, total <= 2 ? 56 : 42, 13);
-        ctx.font = `600 ${px}px Cormorant Garamond, Georgia, serif`;
-        ctx.fillText(line.text, cx, y);
-    });
-
-    ctx.restore();
+    if (lines.length === 1) {
+        ctx.fillText(lines[0], cx, cy + 2, size * 0.72);
+    } else {
+        ctx.fillText(lines[0], cx, cy - 18, size * 0.72);
+        ctx.font = '600 24px Cormorant Garamond, Georgia, serif';
+        ctx.fillText(lines[1], cx, cy + 22, size * 0.72);
+    }
 
     const texture = new THREE.CanvasTexture(canvasEl);
     texture.colorSpace = THREE.SRGBColorSpace;
-    texture.anisotropy = 4;
     return texture;
 }
 

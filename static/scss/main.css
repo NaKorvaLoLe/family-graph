@@ -235,10 +235,10 @@ body:has(.app) {
   justify-content: center;
   background: #2a2622;
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 0.85rem;
-  line-height: 1.2;
+  font-size: 0.7rem;
+  line-height: 1.15;
   text-align: center;
-  padding: 0.5rem;
+  padding: 0.4rem;
   color: #c4a882;
 }
 
@@ -248,7 +248,7 @@ body:has(.app) {
 
 .person-popup__name {
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 1.75rem;
+  font-size: 1.35rem;
   color: #c4a882;
   margin-bottom: 0.75rem;
 }
@@ -321,16 +321,16 @@ body:has(.app) {
   justify-content: center;
   background: #2a2622;
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 0.95rem;
-  line-height: 1.25;
+  font-size: 0.7rem;
+  line-height: 1.15;
   text-align: center;
-  padding: 0.5rem;
+  padding: 0.4rem;
   color: #c4a882;
 }
 
 .person-page__name {
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 2.5rem;
+  font-size: 1.75rem;
   color: #c4a882;
   margin-bottom: 0.25rem;
 }

@@ -257,10 +257,10 @@ body {
         justify-content: center;
         background: $color-node-bg;
         font-family: $font-serif;
-        font-size: 0.85rem;
-        line-height: 1.2;
+        font-size: 0.7rem;
+        line-height: 1.15;
         text-align: center;
-        padding: 0.5rem;
+        padding: 0.4rem;
         color: $color-accent;
 
         &[hidden] {
@@ -270,7 +270,7 @@ body {
 
     &__name {
         font-family: $font-serif;
-        font-size: 1.75rem;
+        font-size: 1.35rem;
         color: $color-accent;
         margin-bottom: 0.75rem;
     }
@@ -345,16 +345,16 @@ body {
         justify-content: center;
         background: $color-node-bg;
         font-family: $font-serif;
-        font-size: 0.95rem;
-        line-height: 1.25;
+        font-size: 0.7rem;
+        line-height: 1.15;
         text-align: center;
-        padding: 0.5rem;
+        padding: 0.4rem;
         color: $color-accent;
     }
 
     &__name {
         font-family: $font-serif;
-        font-size: 2.5rem;
+        font-size: 1.75rem;
         color: $color-accent;
         margin-bottom: 0.25rem;
     }
