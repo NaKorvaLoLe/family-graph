@@ -11,12 +11,37 @@ from .models import (
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ('last_name', 'first_name', 'birth_date', 'death_date')
-    search_fields = ('first_name', 'last_name')
+    list_display = (
+        'last_name',
+        'first_name',
+        'middle_name',
+        'birth_date',
+        'death_date',
+        'graph_x',
+        'graph_y',
+    )
+    list_display_links = ('last_name',)
+    list_editable = (
+        'first_name',
+        'middle_name',
+        'birth_date',
+        'death_date',
+        'graph_x',
+        'graph_y',
+    )
+    search_fields = ('first_name', 'last_name', 'middle_name')
     list_filter = ('birth_date',)
+    list_per_page = 50
     fieldsets = (
         ('Основная информация', {
-            'fields': ('first_name', 'last_name', 'photo', 'birth_date', 'death_date'),
+            'fields': (
+                'last_name',
+                'first_name',
+                'middle_name',
+                'photo',
+                'birth_date',
+                'death_date',
+            ),
         }),
         ('Биография', {
             'fields': ('short_bio', 'full_bio'),

@@ -5,6 +5,7 @@ from django.db import models
 class Person(models.Model):
     first_name = models.CharField('Имя', max_length=100)
     last_name = models.CharField('Фамилия', max_length=100)
+    middle_name = models.CharField('Отчество', max_length=100, blank=True)
     photo = models.ImageField('Фото', upload_to='photos/', blank=True, null=True)
     birth_date = models.DateField('Дата рождения', blank=True, null=True)
     death_date = models.DateField('Дата смерти', blank=True, null=True)
@@ -24,17 +25,37 @@ class Person(models.Model):
         ordering = ['last_name', 'first_name']
 
     def __str__(self):
-        return f'{self.last_name} {self.first_name}'
+        return self.full_name
+
+    @staticmethod
+    def _initial(value):
+        value = (value or '').strip()
+        return f'{value[0].upper()}.' if value else ''
+
+    @property
+    def name_initials(self):
+        """А.В. — инициалы имени и отчества."""
+        return f'{self._initial(self.first_name)}{self._initial(self.middle_name)}'
+
+    @property
+    def node_label(self):
+        """Подпись на узле графа: Вавилов А.В."""
+        initials = self.name_initials
+        if initials:
+            return f'{self.last_name} {initials}'.strip()
+        return self.last_name
 
     @property
     def initials(self):
-        first = self.first_name[0].upper() if self.first_name else ''
-        last = self.last_name[0].upper() if self.last_name else ''
-        return f'{first}{last}'
+        """Для аватара без фото — та же короткая подпись."""
+        return self.node_label
 
     @property
     def full_name(self):
-        return f'{self.first_name} {self.last_name}'
+        parts = [self.last_name, self.first_name]
+        if self.middle_name:
+            parts.append(self.middle_name)
+        return ' '.join(p for p in parts if p)
 
 
 class ParentChildRelation(models.Model):

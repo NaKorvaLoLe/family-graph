@@ -104,13 +104,13 @@ function showPopup(nodeData) {
     } else {
         popupPhoto.hidden = true;
         popupInitials.hidden = false;
-        popupInitials.textContent = nodeData.initials;
+        popupInitials.textContent = nodeData.node_label || nodeData.initials;
     }
 
     popup.hidden = false;
 }
 
-function createInitialsTexture(initials) {
+function createLabelTexture(label) {
     const size = 256;
     const canvasEl = document.createElement('canvas');
     canvasEl.width = size;
@@ -126,11 +126,38 @@ function createInitialsTexture(initials) {
     ctx.lineWidth = 6;
     ctx.stroke();
 
+    const text = (label || '').trim() || '?';
+    const parts = text.split(/\s+/);
+    const line1 = parts[0] || text;
+    const line2 = parts.slice(1).join(' ');
+
     ctx.fillStyle = '#c4a882';
-    ctx.font = 'bold 96px Cormorant Garamond, Georgia, serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(initials, size / 2, size / 2 + 4);
+
+    const maxWidth = size * 0.78;
+    const fitFont = (content, maxPx, minPx) => {
+        let px = maxPx;
+        while (px > minPx) {
+            ctx.font = `600 ${px}px Cormorant Garamond, Georgia, serif`;
+            if (ctx.measureText(content).width <= maxWidth) break;
+            px -= 2;
+        }
+        return px;
+    };
+
+    if (line2) {
+        const size1 = fitFont(line1, 42, 18);
+        const size2 = fitFont(line2, 36, 16);
+        ctx.font = `600 ${size1}px Cormorant Garamond, Georgia, serif`;
+        ctx.fillText(line1, size / 2, size / 2 - 22);
+        ctx.font = `600 ${size2}px Cormorant Garamond, Georgia, serif`;
+        ctx.fillText(line2, size / 2, size / 2 + 26);
+    } else {
+        const size1 = fitFont(line1, 48, 18);
+        ctx.font = `600 ${size1}px Cormorant Garamond, Georgia, serif`;
+        ctx.fillText(line1, size / 2, size / 2 + 2);
+    }
 
     const texture = new THREE.CanvasTexture(canvasEl);
     texture.colorSpace = THREE.SRGBColorSpace;
@@ -153,15 +180,16 @@ function loadPhotoTexture(url) {
 }
 
 async function createNodeMesh(nodeData, position) {
+    const label = nodeData.node_label || nodeData.initials;
     let texture;
     if (nodeData.photo_url) {
         try {
             texture = await loadPhotoTexture(nodeData.photo_url);
         } catch {
-            texture = createInitialsTexture(nodeData.initials);
+            texture = createLabelTexture(label);
         }
     } else {
-        texture = createInitialsTexture(nodeData.initials);
+        texture = createLabelTexture(label);
     }
 
     const geometry = new THREE.CircleGeometry(NODE_RADIUS, 64);

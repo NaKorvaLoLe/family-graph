@@ -10,7 +10,7 @@
         {% if person.photo %}
         <img class="person-page__photo" src="{{ person.photo.url }}" alt="{{ person.full_name }}">
         {% else %}
-        <div class="person-page__initials">{{ person.initials }}</div>
+        <div class="person-page__initials">{{ person.node_label }}</div>
         {% endif %}
         <div class="person-page__info">
             <h1 class="person-page__name">{{ person.full_name }}</h1>

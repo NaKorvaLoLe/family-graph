@@ -33,6 +33,7 @@ class Command(BaseCommand):
 
         grandfather = Person.objects.create(
             first_name='Иван',
+            middle_name='Петрович',
             last_name='Петров',
             birth_date='1940-05-15',
             short_bio='Основатель рода, работал инженером.',
@@ -42,6 +43,7 @@ class Command(BaseCommand):
         )
         grandmother = Person.objects.create(
             first_name='Мария',
+            middle_name='Ивановна',
             last_name='Петрова',
             birth_date='1942-08-20',
             short_bio='Душа семьи, учительница.',
@@ -51,6 +53,7 @@ class Command(BaseCommand):
         )
         father = Person.objects.create(
             first_name='Алексей',
+            middle_name='Иванович',
             last_name='Петров',
             birth_date='1965-03-10',
             short_bio='Старший сын, архитектор.',
@@ -60,6 +63,7 @@ class Command(BaseCommand):
         )
         uncle = Person.objects.create(
             first_name='Дмитрий',
+            middle_name='Иванович',
             last_name='Петров',
             birth_date='1968-11-25',
             short_bio='Младший брат, врач.',
@@ -69,6 +73,7 @@ class Command(BaseCommand):
         )
         aunt = Person.objects.create(
             first_name='Елена',
+            middle_name='Ивановна',
             last_name='Петрова',
             birth_date='1972-07-08',
             short_bio='Младшая сестра, художница.',
@@ -78,6 +83,7 @@ class Command(BaseCommand):
         )
         child = Person.objects.create(
             first_name='Николай',
+            middle_name='Алексеевич',
             last_name='Петров',
             birth_date='1990-01-30',
             short_bio='Продолжатель рода.',
